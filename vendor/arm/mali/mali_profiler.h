@@ -57,7 +57,6 @@ class MaliProfiler : public GpuProfiler
 
 	virtual void                   run() override;
 	virtual const GpuMeasurements &sample() override;
-	virtual void                   stop() override;
 
   private:
 	GpuCounterSet enabled_counters_{};

@@ -517,11 +517,6 @@ void MaliProfiler::run()
 	wait_next_event();
 }
 
-void MaliProfiler::stop()
-{
-	// We don't need to do anything on stop()
-}
-
 const GpuMeasurements &MaliProfiler::sample()
 {
 	sample_counters();
