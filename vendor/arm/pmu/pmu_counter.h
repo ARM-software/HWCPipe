@@ -33,8 +33,6 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 
-#include "hwcpipe_log.h"
-
 enum class PmuImplDefined : uint64_t
 {
 	L1_ACCESSES   = 0x4,
@@ -123,11 +121,6 @@ T PmuCounter::get_value() const
 {
 	long long     value{};
 	const ssize_t result = read(_fd, &value, sizeof(long long));
-
-	if (result == -1)
-	{
-		throw std::runtime_error("Can't get PMU counter value: " + std::string(std::strerror(errno)));
-	}
 
 	return static_cast<T>(value);
 }

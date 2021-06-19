@@ -26,9 +26,11 @@
 
 #include "cpu_profiler.h"
 #include "gpu_profiler.h"
+#include "logging.h"
 
 #include <functional>
 #include <memory>
+#include <utility>
 
 namespace hwcpipe
 {
@@ -53,29 +55,24 @@ class HWCPipe
 	// Initializes HWCPipe with a default set of counters
 	HWCPipe();
 
+	bool init();
+
 	// Sets the enabled counters for the CPU profiler
 	void set_enabled_cpu_counters(CpuCounterSet counters);
 
 	// Sets the enabled counters for the GPU profiler
 	void set_enabled_gpu_counters(GpuCounterSet counters);
 
-	// Starts a profiling session
-	void run();
-
 	// Sample the counters. The function returns pointers to the CPU and GPU
 	// measurements maps, if the corresponding profiler is enabled.
 	// The entries in the maps are the counters that are both available and enabled.
-	// A profiling session must be running when sampling the counters.
-	Measurements sample();
+	std::pair<Measurements, bool> sample();
 
-	// Stops the active profiling session
-	void stop();
-
-	const CpuProfiler *cpu_profiler()
+	CpuProfiler *cpu_profiler()
 	{
 		return cpu_profiler_.get();
 	}
-	const GpuProfiler *gpu_profiler()
+	GpuProfiler *gpu_profiler()
 	{
 		return gpu_profiler_.get();
 	}
@@ -84,7 +81,10 @@ class HWCPipe
 	std::unique_ptr<CpuProfiler> cpu_profiler_{};
 	std::unique_ptr<GpuProfiler> gpu_profiler_{};
 
-	void create_profilers(CpuCounterSet enabled_cpu_counters, GpuCounterSet enabled_gpu_counters);
+	CpuCounterSet enabled_cpu_counters_;
+	GpuCounterSet enabled_gpu_counters_;
+
+	bool create_profilers(CpuCounterSet &enabled_cpu_counters, GpuCounterSet &enabled_gpu_counters);
 };
 
 }        // namespace hwcpipe

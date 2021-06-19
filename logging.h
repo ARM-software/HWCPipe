@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,17 +24,37 @@
 
 #pragma once
 
+#include <fmt/format.h>
+
 #define HWCPIPE_TAG "HWCPipe"
 
-#if defined(__ANDROID__)
-#	include <android/log.h>
+namespace hwcpipe
+{
+// The severity of a log
+enum class LogSeverity
+{
+	Verbose,
+	Info,
+	Debug,
+	Warn,
+	Error,
+	Fatal
+};
 
-#	define HWCPIPE_LOG(...) __android_log_print(ANDROID_LOG_VERBOSE, HWCPIPE_TAG, __VA_ARGS__)
-#else
-#	define HWCPIPE_LOG(...)                              \
-		{                                                 \
-			fprintf(stdout, "%s [INFO] : ", HWCPIPE_TAG); \
-			fprintf(stdout, __VA_ARGS__);                 \
-			fprintf(stdout, "\n");                        \
-		}
-#endif
+// Using the DebugLogCallback allows a project using HWCPipe to define custom logging behaviour
+typedef void (*DebugLogCallback)(LogSeverity severity, const char *message);
+
+void set_logger(DebugLogCallback callback);
+
+DebugLogCallback get_logger();
+
+template <typename... Args>
+void log(LogSeverity severity, const std::string &format, Args... args)
+{
+	auto logger = get_logger();
+	if (logger != nullptr)
+	{
+		logger(severity, fmt::format(format, args...).c_str());
+	}
+}
+}        // namespace hwcpipe

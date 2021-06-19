@@ -168,6 +168,9 @@ class GpuProfiler
   public:
 	virtual ~GpuProfiler() = default;
 
+  // Initialize the profiler
+	virtual bool init() = 0;
+
 	// Returns the enabled counters
 	virtual const GpuCounterSet &enabled_counters() const = 0;
 
@@ -178,15 +181,12 @@ class GpuProfiler
 	virtual void set_enabled_counters(GpuCounterSet counters) = 0;
 
 	// Starts a profiling session
-	virtual void run() = 0;
+	virtual bool poll() = 0;
 
 	// Sample the counters. Returns a map of measurements for the counters
 	// that are both available and enabled.
 	// A profiling session must be running when sampling the counters.
 	virtual const GpuMeasurements &sample() = 0;
-
-	// Stops the active profiling session
-	virtual void stop() = 0;
 };
 
 }        // namespace hwcpipe

@@ -55,9 +55,9 @@ class MaliProfiler : public GpuProfiler
 		enabled_counters_ = std::move(counters);
 	};
 
-	virtual void                   run() override;
+	virtual bool                   init() override;
+	virtual bool                   poll() override;
 	virtual const GpuMeasurements &sample() override;
-	virtual void                   stop() override;
 
   private:
 	GpuCounterSet enabled_counters_{};
@@ -92,7 +92,7 @@ class MaliProfiler : public GpuProfiler
 	    GpuCounter::ExternalMemoryWriteBytes,
 	};
 
-	typedef std::function<double(void)>                             MaliValueGetter;
+	typedef std::function<hwcpipe::DoubleType(void)>                MaliValueGetter;
 	std::unordered_map<GpuCounter, MaliValueGetter, GpuCounterHash> mappings_{};
 
 	const char *const  device_{"/dev/mali0"};
@@ -113,12 +113,11 @@ class MaliProfiler : public GpuProfiler
 
 	GpuMeasurements measurements_{};
 
-	void            init();
-	void            sample_counters();
-	void            wait_next_event();
-	const uint32_t *get_counters(mali_userspace::MaliCounterBlockName block, int index = 0) const;
-	uint64_t        get_counter_value(mali_userspace::MaliCounterBlockName block, const char *name) const;
-	int             find_counter_index_by_name(mali_userspace::MaliCounterBlockName block, const char *name) const;
+	bool                sample_counters();
+	bool                wait_next_event();
+	const uint32_t *    get_counters(mali_userspace::MaliCounterBlockName block, int index = 0) const;
+	hwcpipe::DoubleType get_counter_value(mali_userspace::MaliCounterBlockName block, const char *name) const;
+	int                 find_counter_index_by_name(mali_userspace::MaliCounterBlockName block, const char *name) const;
 };
 
 }        // namespace hwcpipe

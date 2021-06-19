@@ -24,8 +24,13 @@
 
 #pragma once
 
+#include <limits>
+
 namespace hwcpipe
 {
+typedef long long IntType;
+typedef double    DoubleType;
+
 class Value
 {
   public:
@@ -34,14 +39,19 @@ class Value
 	    int_(0),
 	    double_(0.0f)
 	{}
-	Value(long long value) :
+	Value(IntType value) :
 	    is_int_(true),
 	    int_(value)
 	{}
-	Value(double value) :
+	Value(DoubleType value) :
 	    is_int_(false),
 	    double_(value)
 	{}
+
+	bool valid() const
+	{
+		return is_int_ ? int_ == InvalidInt : double_ == InvalidDouble;
+	}
 
 	template <typename T>
 	T get() const
@@ -49,21 +59,24 @@ class Value
 		return is_int_ ? static_cast<T>(int_) : static_cast<T>(double_);
 	}
 
-	void set(long long value)
+	void set(IntType value)
 	{
 		int_    = value;
 		is_int_ = true;
 	}
 
-	void set(double value)
+	void set(DoubleType value)
 	{
 		double_ = value;
 		is_int_ = false;
 	}
 
+	static constexpr IntType    InvalidInt    = std::numeric_limits<IntType>::max();
+	static constexpr DoubleType InvalidDouble = std::numeric_limits<DoubleType>::max();
+
   private:
-	bool      is_int_;
-	long long int_{0};
-	double    double_{0.0};
+	bool       is_int_;
+	IntType    int_{0};
+	DoubleType double_{0.0};
 };
 }        // namespace hwcpipe

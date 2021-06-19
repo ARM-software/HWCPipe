@@ -22,13 +22,17 @@ cmake_minimum_required(VERSION 3.6)
 
 project(hwcpipe LANGUAGES C CXX)
 
+add_subdirectory(third_party/fmt)
+
 set(PROJECT_FILES
     hwcpipe.h
     cpu_profiler.h
     gpu_profiler.h
     value.h
-
-    hwcpipe.cpp)
+    logging.h
+    
+    hwcpipe.cpp
+    logging.cpp)
 
 if(UNIX AND NOT APPLE)
     list(APPEND PROJECT_FILES
@@ -48,8 +52,12 @@ source_group("\\" FILES ${PROJECT_FILES})
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_FILES})
 
+target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt-header-only)
+
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_include_directories(${PROJECT_NAME} PUBLIC third_party)
+
+target_include_directories(${PROJECT_NAME} PUBLIC third_party/fmt/include)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)

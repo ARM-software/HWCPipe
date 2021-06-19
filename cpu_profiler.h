@@ -117,15 +117,17 @@ const std::unordered_map<CpuCounter, CpuCounterInfo, CpuCounterHash> cpu_counter
     {CpuCounter::CryptoSpec, {"Speculatively executed cryptographic operations", "operations"}},
 };
 
-typedef std::unordered_set<CpuCounter, CpuCounterHash> CpuCounterSet;
-typedef std::unordered_map<CpuCounter, Value, CpuCounterHash>
-    CpuMeasurements;
+typedef std::unordered_set<CpuCounter, CpuCounterHash>        CpuCounterSet;
+typedef std::unordered_map<CpuCounter, Value, CpuCounterHash> CpuMeasurements;
 
 /** An interface for classes that collect CPU performance data. */
 class CpuProfiler
 {
   public:
 	virtual ~CpuProfiler() = default;
+
+	// Initialize the profiler
+	virtual bool init() = 0;
 
 	// Returns the enabled counters
 	virtual const CpuCounterSet &enabled_counters() const = 0;
@@ -137,15 +139,12 @@ class CpuProfiler
 	virtual void set_enabled_counters(CpuCounterSet counters) = 0;
 
 	// Starts a profiling session
-	virtual void run() = 0;
+	virtual bool poll() = 0;
 
 	// Sample the counters. Returns a map of measurements for the counters
 	// that are both available and enabled.
 	// A profiling session must be running when sampling the counters.
 	virtual const CpuMeasurements &sample() = 0;
-
-	// Stops the active profiling session
-	virtual void stop() = 0;
 };
 
 }        // namespace hwcpipe

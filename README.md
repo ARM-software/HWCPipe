@@ -55,21 +55,29 @@ add_subdirectory(hwcpipe)
 Basic usage for HWCPipe is simple:
 
 ```
+// Create a custom logger if logging to stdout is not desired
+void logger(hwcpipe::LogSeverity severity, const char* log){}
+hwcpipe::HWCPipe::set_logger(&logger);
+
 // HWCPipe performs automated platform detection for CPU/GPU counters
 hwcpipe::HWCPipe h;
-
-// Start HWCPipe once at the beginning of the profiling session
-h.run();
+ 
+if (!h.init()) {
+    // Failed to set up HWCPipe
+}
 
 while (main_loop) {
     // Call sample() to sample counters with the frequency you need
-    auto measurements = h.sample();
+    auto samples = h.sample();
+    auto valid = samples->second;
+    auto& measurements = samples->first;
+
+    if (!valid) {
+        // Failure getting samples...
+    }
 
     [...]
 }
-
-// At the end of the profiling session, stop HWCPipe
-h.stop();
 ```
 
 The `sample` function returns a `Measurements` struct, which can be accessed like this:
@@ -82,8 +90,14 @@ if (measurements.cpu)
     const auto &counter = measurements.cpu->find(CpuCounter::Cycles);
     if (counter != measurements.cpu->end())
     {
+        auto& counterValue = counter->second;
+
+        if (!counterValue.valid()) {
+            // This value was not retrieved correctly from the profiler
+        }
+
         // Get the data stored in the counter, casted to the type you need
-        auto value = counter->second.get<float>();
+        auto value = counterValue.get<float>();
     }
 }
 ```
